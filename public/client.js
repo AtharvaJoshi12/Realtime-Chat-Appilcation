@@ -10,6 +10,7 @@ do {
   name = prompt("Please enter your name: ");
 } while (!name);
 
+socket.emit("new-user-joined", name);
 myname.innerHTML = name;
 textarea.addEventListener("keyup", (e) => {
   if (e.key === "Enter") {
@@ -61,3 +62,41 @@ socket.on("message", (msg) => {
 function scrollToBottom() {
   messageArea.scrollTop = messageArea.scrollHeight;
 }
+
+const appendUser = (msg, type) => {
+  let mainDiv = document.createElement("div");
+  let className = type;
+  mainDiv.classList.add(className, "message");
+
+  let markup = `
+        <h4> </h4>
+        <p>${msg} Joined The Chat</p>
+        
+    `;
+
+  mainDiv.innerHTML = markup;
+  messageArea.appendChild(mainDiv);
+};
+
+const removeUser = (msg, type) => {
+  let mainDiv = document.createElement("div");
+  let className = type;
+  mainDiv.classList.add(className, "message");
+
+  let markup = `
+        <h4> </h4>
+        <p>${msg} Left The Chat</p>
+        
+    `;
+
+  mainDiv.innerHTML = markup;
+  messageArea.appendChild(mainDiv);
+};
+
+socket.on("user-joined", (msg) => {
+  appendUser(msg, "incoming");
+});
+
+socket.on("left", (msg) => {
+  removeUser(msg, "incoming");
+});

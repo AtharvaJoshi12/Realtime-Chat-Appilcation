@@ -16,11 +16,25 @@ app.get("/", (req, res) => {
 
 // Socket
 
+const users = {};
 const io = require("socket.io")(http);
 
 io.on("connection", (socket) => {
   console.log("Connected ...");
+
+  socket.on("new-user-joined", (name) => {
+    console.log("New user joined", name);
+    users[socket.id] = name;
+    socket.broadcast.emit("user-joined", name);
+    console.log(users);
+  });
+
   socket.on("message", (msg) => {
     socket.broadcast.emit("message", msg);
+  });
+
+  socket.on("disconnect", (msg) => {
+    socket.broadcast.emit("left", users[socket.id]);
+    delete users[socket.id];
   });
 });
