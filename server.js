@@ -37,4 +37,8 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("left", users[socket.id]);
     delete users[socket.id];
   });
+
+  socket.on("typing", (data) => {
+    socket.broadcast.emit("typing", data);
+  });
 });

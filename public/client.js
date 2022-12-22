@@ -20,7 +20,6 @@ textarea.addEventListener("keyup", (e) => {
 
 function sendButton(e) {
   sendMessage(document.getElementById("textarea").value);
-  // console.log("button clicked");
 }
 
 function sendMessage(message) {
@@ -31,11 +30,16 @@ function sendMessage(message) {
 
   // Append
 
-  appendMessage(msg, "outgoing");
-  textarea.value = "";
-  scrollToBottom();
-  // Send to server
-  socket.emit("message", msg);
+  if (msg.message) {
+    appendMessage(msg, "outgoing");
+    textarea.value = "";
+    scrollToBottom();
+    // Send to server
+    socket.emit("message", msg);
+  } else {
+    textarea.value = "";
+    alert("Can't send empty message");
+  }
 }
 
 function appendMessage(msg, type) {
@@ -99,4 +103,29 @@ socket.on("user-joined", (msg) => {
 
 socket.on("left", (msg) => {
   removeUser(msg, "incoming");
+});
+
+// typing animation
+
+let timerId = null;
+
+function debounce(func, timer) {
+  if (timerId) {
+    clearTimeout(timerId);
+  }
+  timerId = setTimeout(() => {
+    func();
+  }, timer);
+}
+
+let typingDiv = document.querySelector(".typing");
+socket.on("typing", (data) => {
+  typingDiv.innerText = `${data.name} is typing...`;
+  debounce(function () {
+    typingDiv.innerText = "";
+  }, 1000);
+});
+
+textarea.addEventListener("keyup", (e) => {
+  socket.emit("typing", { name: name });
 });
